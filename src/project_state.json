@@ -1,0 +1,306 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Way of Learning - A complete cross-platform web-based education platform connecting Teachers, Students, and Parents. Features role-based authentication (Internet Identity), class management, assignment submission, quiz creation, attendance tracking, grading, study materials repository, announcements, discussion boards, parent-student linking, admin panel, and responsive mobile-friendly design. Video classes handled via external links (Google Meet/Zoom).",
+  "architectural_notes": [
+    "Web-based platform built with Motoko backend and React frontend",
+    "Authentication via Internet Identity (supports Google, passkeys)",
+    "Three distinct user roles: Teacher, Student, Parent with separate dashboards",
+    "File storage for study materials and assignment submissions",
+    "External video conferencing integration via links (no native WebRTC)",
+    "Async discussion boards instead of real-time chat",
+    "Parent-student linking via unique Student ID",
+    "Admin panel for user and platform management"
+  ],
+  "known_issues": [
+    "No native mobile apps - web-based PWA approach only",
+    "No real-time video conferencing - external links required",
+    "No real-time messaging - async discussion boards instead",
+    "No phone OTP or SMS notifications",
+    "No push notifications to mobile devices",
+    "Teacher role redirect gets stuck after authentication - user stays on redirecting page instead of reaching dashboard"
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-implement-role-based-authentication-system-with-three-distinct-user-roles-teacher-student-and-parent-using-internet-identity-supporting-google-sign-in-and-passkeys",
+      "title": "Implement role-based authentication system with three distinct user roles: Teacher, Student, and Parent using Internet Identity (supporting Google Sign-in and passkeys)",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-user-profile-management-with-fields-for-name-profile-photo-upload-class-section-assignment-and-phone-number",
+      "title": "Create user profile management with fields for name, profile photo upload, class/section assignment, and phone number",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-teacher-dashboard-with-class-creation-functionality-allowing-teachers-to-create-classes-with-names-e-g-bca-1st-sem-10th-a-section-and-auto-generate-unique-enrollment-codes",
+      "title": "Build Teacher dashboard with class creation functionality allowing teachers to create classes with names (e.g., 'BCA 1st Sem', '10th A Section') and auto-generate unique enrollment codes",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-session-scheduling-system-where-teachers-can-schedule-video-class-sessions-with-title-date-time-duration-and-external-video-link-google-meet-zoom-with-an-option-to-start-instant-sessions",
+      "title": "Implement session scheduling system where teachers can schedule video class sessions with title, date, time, duration, and external video link (Google Meet/Zoom), with an option to start instant sessions",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-study-materials-upload-system-allowing-teachers-to-upload-and-organize-files-pdf-ppt-doc-images-and-video-links-within-each-class-with-download-capability-for-students",
+      "title": "Create study materials upload system allowing teachers to upload and organize files (PDF, PPT, DOC, images) and video links within each class, with download capability for students",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-assignment-management-system-where-teachers-create-assignments-with-title-description-due-date-and-maximum-points-and-students-submit-assignments-via-file-upload-photos-pdfs",
+      "title": "Build assignment management system where teachers create assignments with title, description, due date, and maximum points, and students submit assignments via file upload (photos/PDFs)",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-grading-system-where-teachers-can-grade-assignment-submissions-with-numeric-scores-and-optional-feedback-comments-visible-to-students-and-linked-parents",
+      "title": "Implement grading system where teachers can grade assignment submissions with numeric scores and optional feedback comments, visible to students and linked parents",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-attendance-tracking-system-where-teachers-can-mark-student-attendance-for-each-session-with-statuses-present-absent-late-with-attendance-history-visible-to-students-and-parents",
+      "title": "Create attendance tracking system where teachers can mark student attendance for each session with statuses (Present, Absent, Late), with attendance history visible to students and parents",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-quiz-creation-and-taking-system-where-teachers-create-quizzes-with-mcq-and-true-false-questions-set-time-limits-and-passing-scores-and-students-take-quizzes-with-automatic-grading",
+      "title": "Build quiz creation and taking system where teachers create quizzes with MCQ and True/False questions, set time limits and passing scores, and students take quizzes with automatic grading",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-announcement-system-where-teachers-and-admins-can-post-class-wide-or-platform-wide-announcements-with-title-content-and-optional-attachments-visible-to-all-relevant-users",
+      "title": "Implement announcement system where teachers and admins can post class-wide or platform-wide announcements with title, content, and optional attachments, visible to all relevant users",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-student-dashboard-with-class-enrollment-functionality-using-enrollment-codes-displaying-enrolled-classes-upcoming-sessions-pending-assignments-recent-announcements-and-attendance-summary",
+      "title": "Create Student dashboard with class enrollment functionality using enrollment codes, displaying enrolled classes, upcoming sessions, pending assignments, recent announcements, and attendance summary",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-class-discussion-board-system-where-students-can-post-questions-doubts-and-teachers-can-respond-creating-threaded-discussions-within-each-class",
+      "title": "Build class discussion board system where students can post questions/doubts and teachers can respond, creating threaded discussions within each class",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-async-messaging-board-for-one-to-one-communication-between-teacher-student-and-teacher-parent-pairs-allowing-text-messages-and-file-attachments-with-message-history",
+      "title": "Implement async messaging board for one-to-one communication between Teacher-Student and Teacher-Parent pairs, allowing text messages and file attachments with message history",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-parent-dashboard-with-student-linking-functionality-using-unique-student-id-displaying-linked-child-s-attendance-record-grades-progress-reports-class-announcements-and-teacher-contact-options",
+      "title": "Create Parent dashboard with student linking functionality using unique Student ID, displaying linked child's attendance record, grades, progress reports, class announcements, and teacher contact options",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-progress-report-and-performance-analytics-system-generating-visual-graphs-for-student-performance-trends-attendance-patterns-grade-distribution-and-assignment-completion-rates-accessible-to-students-and-parents",
+      "title": "Build progress report and performance analytics system generating visual graphs for student performance trends, attendance patterns, grade distribution, and assignment completion rates, accessible to students and parents",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-admin-panel-with-comprehensive-user-management-allowing-admins-to-view-approve-suspend-or-delete-teacher-student-and-parent-accounts-with-bulk-actions-and-search-filter-capabilities",
+      "title": "Implement Admin panel with comprehensive user management allowing admins to view, approve, suspend, or delete Teacher, Student, and Parent accounts, with bulk actions and search/filter capabilities",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-admin-platform-monitoring-dashboard-displaying-statistics-for-total-users-by-role-active-classes-assignments-created-submitted-quiz-participation-rates-and-overall-platform-activity-trends",
+      "title": "Create admin platform monitoring dashboard displaying statistics for total users by role, active classes, assignments created/submitted, quiz participation rates, and overall platform activity trends",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-calendar-view-system-showing-scheduled-sessions-assignment-due-dates-and-quiz-deadlines-in-a-monthly-and-weekly-grid-format-with-date-navigation-and-event-filtering",
+      "title": "Build calendar view system showing scheduled sessions, assignment due dates, and quiz deadlines in a monthly and weekly grid format, with date navigation and event filtering",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-design-and-implement-a-clean-modern-responsive-ui-with-dashboard-cards-bottom-side-navigation-appropriate-to-screen-size-material-design-principles-fast-loading-times-and-mobile-first-approach-that-works-beautifully-on-all-devices",
+      "title": "Design and implement a clean, modern, responsive UI with dashboard cards, bottom/side navigation appropriate to screen size, Material Design principles, fast loading times, and mobile-first approach that works beautifully on all devices",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-cohesive-visual-design-system-with-a-fresh-educational-aesthetic-using-warm-and-inviting-colors-avoiding-blue-and-purple-unless-specifically-for-data-visualization-modern-typography-optimized-for-readability-consistent-spacing-and-layout-patterns-and-thoughtful-use-of-icons-and-illustrations-that-support-the-learning-environment",
+      "title": "Create a cohesive visual design system with a fresh, educational aesthetic using warm and inviting colors (avoiding blue and purple unless specifically for data visualization), modern typography optimized for readability, consistent spacing and layout patterns, and thoughtful use of icons and illustrations that support the learning environment",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-redirect-logic-in-app-tsx-to-properly-navigate-teacher-users-to-teacher-dashboard-after-role-selection-and-profile-creation-ensuring-the-page-does-not-get-stuck-on-a-redirecting-state",
+      "title": "Fix the redirect logic in App.tsx to properly navigate Teacher users to /teacher/dashboard after role selection and profile creation, ensuring the page does not get stuck on a redirecting state",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-error-handling-and-timeout-logic-to-the-role-selection-and-profile-creation-flow-in-roleselectionmodal-tsx-to-prevent-infinite-loading-states-when-the-redirect-fails",
+      "title": "Add error handling and timeout logic to the role selection and profile creation flow in RoleSelectionModal.tsx to prevent infinite loading states when the redirect fails",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-that-the-usequeries-ts-mutation-for-createprofile-properly-invalidates-the-user-profile-query-cache-and-triggers-the-authentication-state-update-that-drives-the-redirect-in-app-tsx",
+      "title": "Verify that the useQueries.ts mutation for createProfile properly invalidates the user profile query cache and triggers the authentication state update that drives the redirect in App.tsx",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Role-based authentication system with Teacher, Student, and Parent roles using Internet Identity",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Teacher dashboard with class creation, enrollment codes, and class management",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Assignment creation, submission, and grading system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Quiz builder with MCQ and True/False question types",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Attendance tracking system for teachers",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Study materials repository with file upload (PDF, images, documents)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Announcement system for teachers and admins",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Student dashboard with class enrollment via code, materials access, and quiz taking",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Discussion boards for class communication",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Parent dashboard with student linking via Student ID and progress monitoring",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Admin panel with user management and platform statistics",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Session scheduling system with external video links (Google Meet/Zoom)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Performance graphs and progress reports",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Calendar view for scheduled classes and assignments",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Responsive mobile-friendly UI design",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Way of Learning",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

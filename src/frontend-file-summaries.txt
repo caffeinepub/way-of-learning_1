@@ -1,0 +1,7 @@
+{
+  "frontend/src/components/auth/RoleSelectionModal.tsx": "Modal component for first-time users to select their role (Teacher, Student, or Parent) with timeout handling, error states, retry functionality, and proper mutation handling without page reloads.",
+  "frontend/src/components/profile/ProfileForm.tsx": "Profile editing form component with photo upload, name, phone number, and class/section fields, properly handling optional UserProfile fields and UserType enum.",
+  "frontend/src/components/shared/MaterialCard.tsx": "Reusable card component for displaying study materials with proper TypeScript discriminated union type narrowing for file vs video link attachments.",
+  "frontend/src/App.tsx": "Main app component with TanStack Router integration, handles authentication flow and role-based navigation using proper router navigation instead of hash-based redirects with debug logging for troubleshooting.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles, classes, sessions, materials, assignments, grades, attendance, admin checks, and approval system with proper cache invalidation, refetching, and debug logging."
+}

@@ -1,0 +1,68 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-fix-the-redirect-logic-in-app-tsx-to-properly-navigate-teacher-users-to-teacher-dashboard-after-role-selection-and-profile-creation-ensuring-the-page-does-not-get-stuck-on-a-redirecting-state",
+      "featureTitle": "Fix the redirect logic in App.tsx to properly navigate Teacher users to /teacher/dashboard after role selection and profile creation, ensuring the page does not get stuck on a redirecting state",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-21"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-error-handling-and-timeout-logic-to-the-role-selection-and-profile-creation-flow-in-roleselectionmodal-tsx-to-prevent-infinite-loading-states-when-the-redirect-fails",
+      "featureTitle": "Add error handling and timeout logic to the role selection and profile creation flow in RoleSelectionModal.tsx to prevent infinite loading states when the redirect fails",
+      "files": [
+        "frontend/src/components/auth/RoleSelectionModal.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-22"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-verify-that-the-usequeries-ts-mutation-for-createprofile-properly-invalidates-the-user-profile-query-cache-and-triggers-the-authentication-state-update-that-drives-the-redirect-in-app-tsx",
+      "featureTitle": "Verify that the useQueries.ts mutation for createProfile properly invalidates the user profile query cache and triggers the authentication state update that drives the redirect in App.tsx",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-23"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

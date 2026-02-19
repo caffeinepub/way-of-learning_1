@@ -1,0 +1,82 @@
+{
+  "kind": "build_request",
+  "title": "Fix Teacher role redirect after authentication",
+  "projectName": "Way of Learning",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-21",
+      "text": "Fix the redirect logic in App.tsx to properly navigate Teacher users to /teacher/dashboard after role selection and profile creation, ensuring the page does not get stuck on a redirecting state",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-6",
+          "msg-7"
+        ],
+        "quotes": [
+          "After selecting the role the webpage is stuck in redirecting page",
+          "Teachers role"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After a teacher completes Internet Identity authentication and selects the Teacher role, they are redirected to /teacher/dashboard within 2 seconds",
+        "No intermediate loading or redirecting page remains visible after role selection",
+        "The redirect flow completes successfully for Teacher role without hanging or timing out",
+        "Student and Parent role redirects continue to work as expected"
+      ]
+    },
+    {
+      "id": "REQ-22",
+      "text": "Add error handling and timeout logic to the role selection and profile creation flow in RoleSelectionModal.tsx to prevent infinite loading states when the redirect fails",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-6"
+        ],
+        "quotes": [
+          "After selecting the role the webpage is stuck in redirecting page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If profile creation or role selection takes longer than 10 seconds, display an error message to the user",
+        "User receives clear feedback if the redirect fails with an option to retry",
+        "Console logs capture any errors during the authentication and redirect process for debugging"
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "text": "Verify that the useQueries.ts mutation for createProfile properly invalidates the user profile query cache and triggers the authentication state update that drives the redirect in App.tsx",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-6"
+        ],
+        "quotes": [
+          "After selecting the role the webpage is stuck in redirecting page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After createProfile mutation succeeds, the profile query is invalidated and refetched",
+        "The App.tsx component receives the updated profile data with the Teacher role",
+        "The routing logic in App.tsx correctly evaluates the Teacher role and navigates to /teacher/dashboard"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify the Internet Identity authentication flow in useInternetIdentity.ts",
+    "Preserve the existing role selection UI in RoleSelectionModal.tsx",
+    "Maintain compatibility with Student and Parent role redirect flows"
+  ],
+  "nonGoals": [
+    "Changing the overall authentication architecture",
+    "Adding new roles beyond Teacher, Student, and Parent",
+    "Implementing server-side redirects"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

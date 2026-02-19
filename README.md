@@ -1,2 +1,3 @@
-# way-of-learning_1
-Exported from Caffeine project: Way of Learning
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

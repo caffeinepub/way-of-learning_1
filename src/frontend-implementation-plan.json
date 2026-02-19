@@ -1,0 +1,56 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix Teacher role redirect after authentication",
+  "requirements": [
+    {
+      "id": "REQ-21",
+      "summary": "Fix the redirect logic in App.tsx to properly navigate Teacher users to /teacher/dashboard after role selection and profile creation",
+      "acceptanceCriteria": [
+        "After a teacher completes Internet Identity authentication and selects the Teacher role, they are redirected to /teacher/dashboard within 2 seconds",
+        "No intermediate loading or redirecting page remains visible after role selection",
+        "The redirect flow completes successfully for Teacher role without hanging or timing out",
+        "Student and Parent role redirects continue to work as expected"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Fix the redirect logic to properly handle Teacher role navigation after profile creation. Review the current conditional rendering logic that determines when to show the landing page, role selection modal, or dashboard routes. Ensure that after a Teacher user completes profile creation, the routing evaluates the updated profile state and navigates to /teacher/dashboard without getting stuck in a redirecting state. Add debug logging to trace the authentication state flow and profile updates during the redirect process."
+        }
+      ]
+    },
+    {
+      "id": "REQ-22",
+      "summary": "Add error handling and timeout logic to the role selection and profile creation flow in RoleSelectionModal.tsx to prevent infinite loading states",
+      "acceptanceCriteria": [
+        "If profile creation or role selection takes longer than 10 seconds, display an error message to the user",
+        "User receives clear feedback if the redirect fails with an option to retry",
+        "Console logs capture any errors during the authentication and redirect process for debugging"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/auth/RoleSelectionModal.tsx",
+          "operation": "modify",
+          "description": "Add timeout handling to the profile creation mutation flow. Implement a 10-second timeout that displays an error message if the profile creation takes too long. Add error state management with clear user feedback including retry functionality. Wrap the mutation calls in try-catch blocks and add console.error logging for debugging. Ensure the modal provides actionable feedback if the backend call fails or times out, preventing users from being stuck in a loading state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "summary": "Verify that the useQueries.ts mutation for createProfile properly invalidates the user profile query cache and triggers the authentication state update that drives the redirect in App.tsx",
+      "acceptanceCriteria": [
+        "After createProfile mutation succeeds, the profile query is invalidated and refetched",
+        "The App.tsx component receives the updated profile data with the Teacher role",
+        "The routing logic in App.tsx correctly evaluates the Teacher role and navigates to /teacher/dashboard"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Review and fix the saveCallerUserProfile mutation to ensure proper query invalidation. Verify that the mutation's onSuccess callback invalidates the 'currentUserProfile' query key, triggering a refetch of the user profile. Add error handling and logging to track mutation success/failure. Ensure the mutation properly awaits the backend call and handles the response before triggering cache invalidation. This will ensure App.tsx receives the updated profile state with the Teacher role, enabling the correct redirect flow."
+        }
+      ]
+    }
+  ]
+}
