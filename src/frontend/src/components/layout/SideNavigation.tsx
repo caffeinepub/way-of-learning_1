@@ -1,5 +1,6 @@
 import { useGetCallerUserProfile } from '../../hooks/useQueries';
 import { Button } from '@/components/ui/button';
+import { useNavigate, useLocation } from '@tanstack/react-router';
 import {
   Home,
   BookOpen,
@@ -11,7 +12,8 @@ import {
   ClipboardList,
   BarChart3,
   Users,
-  Settings,
+  FolderOpen,
+  MessagesSquare,
 } from 'lucide-react';
 
 interface SideNavigationProps {
@@ -20,6 +22,8 @@ interface SideNavigationProps {
 
 export default function SideNavigation({ onNavigate }: SideNavigationProps) {
   const { data: userProfile } = useGetCallerUserProfile();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const getMenuItems = () => {
     const userType = userProfile?.userType;
@@ -27,6 +31,7 @@ export default function SideNavigation({ onNavigate }: SideNavigationProps) {
     const commonItems = [
       { icon: Calendar, label: 'Calendar', path: '/calendar' },
       { icon: MessageSquare, label: 'Messages', path: '/messages' },
+      { icon: MessagesSquare, label: 'Discussions', path: '/discussions' },
       { icon: User, label: 'Profile', path: '/profile' },
     ];
 
@@ -34,6 +39,8 @@ export default function SideNavigation({ onNavigate }: SideNavigationProps) {
       return [
         { icon: Home, label: 'Dashboard', path: '/teacher' },
         { icon: BookOpen, label: 'My Classes', path: '/teacher' },
+        { icon: FolderOpen, label: 'Materials', path: '/teacher/materials' },
+        { icon: GraduationCap, label: 'Quizzes', path: '/teacher/quizzes' },
         ...commonItems,
       ];
     }
@@ -42,6 +49,8 @@ export default function SideNavigation({ onNavigate }: SideNavigationProps) {
       return [
         { icon: Home, label: 'Dashboard', path: '/student' },
         { icon: BookOpen, label: 'My Classes', path: '/student' },
+        { icon: FileText, label: 'Assignments', path: '/student/assignments' },
+        { icon: FolderOpen, label: 'Materials', path: '/student/materials' },
         { icon: FileText, label: 'Grades', path: '/student/grades' },
         { icon: ClipboardList, label: 'Attendance', path: '/student/attendance' },
         { icon: GraduationCap, label: 'Quizzes', path: '/student/quizzes' },
@@ -53,7 +62,7 @@ export default function SideNavigation({ onNavigate }: SideNavigationProps) {
     if (userType === 'parent') {
       return [
         { icon: Home, label: 'Dashboard', path: '/parent' },
-        { icon: Users, label: 'My Children', path: '/parent' },
+        { icon: Users, label: 'My Children', path: '/parent/children' },
         ...commonItems,
       ];
     }
@@ -69,7 +78,9 @@ export default function SideNavigation({ onNavigate }: SideNavigationProps) {
   const menuItems = getMenuItems();
 
   const handleNavigate = (path: string) => {
-    window.location.hash = `#${path}`;
+    navigate({ to: path }).catch((err) => {
+      console.error('[SideNavigation] Navigation error:', err);
+    });
     onNavigate?.();
   };
 
@@ -77,7 +88,7 @@ export default function SideNavigation({ onNavigate }: SideNavigationProps) {
     <nav className="flex h-full flex-col gap-2 p-4">
       {menuItems.map((item) => {
         const Icon = item.icon;
-        const isActive = window.location.hash.includes(item.path);
+        const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
         return (
           <Button

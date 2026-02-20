@@ -2,6 +2,19 @@
   "frontend/src/components/auth/RoleSelectionModal.tsx": "Modal component for first-time users to select their role (Teacher, Student, or Parent) with timeout handling, error states, retry functionality, and proper mutation handling without page reloads.",
   "frontend/src/components/profile/ProfileForm.tsx": "Profile editing form component with photo upload, name, phone number, and class/section fields, properly handling optional UserProfile fields and UserType enum.",
   "frontend/src/components/shared/MaterialCard.tsx": "Reusable card component for displaying study materials with proper TypeScript discriminated union type narrowing for file vs video link attachments.",
-  "frontend/src/App.tsx": "Main app component with TanStack Router integration, handles authentication flow and role-based navigation using proper router navigation instead of hash-based redirects with debug logging for troubleshooting.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles, classes, sessions, materials, assignments, grades, attendance, admin checks, and approval system with proper cache invalidation, refetching, and debug logging."
+  "frontend/src/App.tsx": "Main app component with TanStack Router integration, handles authentication flow, role-based navigation, and includes all routes for teacher, student, parent, and admin dashboards with proper React Router navigation.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including messaging, approval system, and all CRUD operations with proper cache invalidation.",
+  "frontend/src/components/layout/SideNavigation.tsx": "Side navigation component using React Router's useNavigate and useLocation hooks for proper navigation and active state detection across all user roles.",
+  "frontend/src/components/layout/BottomNavigation.tsx": "Mobile bottom navigation component using React Router's useNavigate and useLocation hooks for proper navigation and active state detection.",
+  "frontend/src/components/layout/AppLayout.tsx": "Application layout wrapper with header, side navigation, and bottom navigation using React Router's useNavigate for logout navigation.",
+  "frontend/src/pages/shared/MessagesPage.tsx": "Messaging page with send message form and received messages list, integrated with backend messaging capabilities.",
+  "frontend/src/pages/shared/CalendarPage.tsx": "Calendar page displaying upcoming sessions and assignment due dates in chronological order with proper icon rendering logic.",
+  "frontend/src/pages/shared/DiscussionsPage.tsx": "Discussion forums page placeholder showing coming soon message.",
+  "frontend/src/pages/shared/ApprovalRequestPage.tsx": "Approval request page for unapproved users to request access to the platform.",
+  "frontend/src/pages/student/AssignmentsPage.tsx": "Student assignments page displaying all assignments with due dates, status badges, and max points.",
+  "frontend/src/pages/student/MaterialsPage.tsx": "Student materials page displaying all study materials from enrolled classes with download/view options.",
+  "frontend/src/pages/teacher/MaterialsPage.tsx": "Teacher materials page displaying all uploaded study materials across classes.",
+  "frontend/src/pages/teacher/QuizzesPage.tsx": "Teacher quizzes page placeholder showing coming soon message.",
+  "frontend/src/pages/parent/ChildrenPage.tsx": "Parent children page placeholder for viewing linked children.",
+  "frontend/src/index.css": "Global styles with OKLCH color system for light and dark modes using warm orange/terracotta educational theme."
 }

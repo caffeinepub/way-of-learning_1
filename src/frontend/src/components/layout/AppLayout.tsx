@@ -1,7 +1,9 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from '../../hooks/useQueries';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 import SideNavigation from './SideNavigation';
 import BottomNavigation from './BottomNavigation';
 import { Button } from '@/components/ui/button';
@@ -14,15 +16,18 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const { clear, identity } = useInternetIdentity();
+  const { clear } = useInternetIdentity();
   const { data: userProfile } = useGetCallerUserProfile();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await clear();
     queryClient.clear();
-    window.location.hash = '#/';
+    navigate({ to: '/' }).catch((err) => {
+      console.error('[AppLayout] Navigation error:', err);
+    });
   };
 
   return (

@@ -15,6 +15,7 @@ import type {
   ClassId,
   AssignmentId,
   SessionId,
+  Message,
 } from '../backend';
 import { ExternalBlob } from '../backend';
 import { Principal } from '@dfinity/principal';
@@ -138,14 +139,7 @@ export function useCreateSession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      classId,
-      title,
-      dateTime,
-      duration,
-      videoLink,
-      instant,
-    }: {
+    mutationFn: async (data: {
       classId: ClassId;
       title: string;
       dateTime: bigint;
@@ -154,7 +148,14 @@ export function useCreateSession() {
       instant: boolean;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createSession(classId, title, dateTime, duration, videoLink, instant);
+      return actor.createSession(
+        data.classId,
+        data.title,
+        data.dateTime,
+        data.duration,
+        data.videoLink,
+        data.instant
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
@@ -180,17 +181,9 @@ export function useUploadStudyMaterial() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      classId,
-      name,
-      material,
-    }: {
-      classId: ClassId;
-      name: string;
-      material: Attachment;
-    }) => {
+    mutationFn: async (data: { classId: ClassId; name: string; material: Attachment }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.uploadStudyMaterial(classId, name, material);
+      return actor.uploadStudyMaterial(data.classId, data.name, data.material);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyMaterials'] });
@@ -216,13 +209,7 @@ export function useCreateAssignment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      classId,
-      title,
-      description,
-      dueDate,
-      maxPoints,
-    }: {
+    mutationFn: async (data: {
       classId: ClassId;
       title: string;
       description: string;
@@ -230,7 +217,13 @@ export function useCreateAssignment() {
       maxPoints: bigint;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createAssignment(classId, title, description, dueDate, maxPoints);
+      return actor.createAssignment(
+        data.classId,
+        data.title,
+        data.description,
+        data.dueDate,
+        data.maxPoints
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assignments'] });
@@ -243,19 +236,26 @@ export function useSubmitAssignment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      assignmentId,
-      submissionFile,
-    }: {
-      assignmentId: AssignmentId;
-      submissionFile: ExternalBlob;
-    }) => {
+    mutationFn: async (data: { assignmentId: AssignmentId; submissionFile: ExternalBlob }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.submitAssignment(assignmentId, submissionFile);
+      return actor.submitAssignment(data.assignmentId, data.submissionFile);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['assignmentSubmissions'] });
     },
+  });
+}
+
+export function useGetAssignmentSubmissions(assignmentId: string) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['assignmentSubmissions', assignmentId],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAssignmentSubmissions(BigInt(assignmentId));
+    },
+    enabled: !!actor && !actorFetching && !!assignmentId,
   });
 }
 
@@ -277,19 +277,14 @@ export function useGradeAssignment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      assignmentId,
-      studentId,
-      score,
-      comments,
-    }: {
+    mutationFn: async (data: {
       assignmentId: AssignmentId;
       studentId: string;
       score: bigint;
       comments: string | null;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.gradeAssignment(assignmentId, studentId, score, comments);
+      return actor.gradeAssignment(data.assignmentId, data.studentId, data.score, data.comments);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grades'] });
@@ -301,7 +296,7 @@ export function useGetAttendanceRecords() {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<AttendanceRecord[]>({
-    queryKey: ['attendance'],
+    queryKey: ['attendanceRecords'],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAttendanceRecords();
@@ -315,22 +310,17 @@ export function useMarkAttendance() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      classId,
-      sessionId,
-      studentId,
-      status,
-    }: {
+    mutationFn: async (data: {
       classId: ClassId;
       sessionId: SessionId;
       studentId: string;
       status: AttendanceStatus;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.markAttendance(classId, sessionId, studentId, status);
+      return actor.markAttendance(data.classId, data.sessionId, data.studentId, data.status);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['attendanceRecords'] });
     },
   });
 }
@@ -345,8 +335,21 @@ export function useLinkChild() {
       return actor.linkChild(studentId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['linkedChildren'] });
     },
+  });
+}
+
+export function useIsCallerAdmin() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['isAdmin'],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isCallerAdmin();
+    },
+    enabled: !!actor && !actorFetching,
   });
 }
 
@@ -375,19 +378,6 @@ export function useDeleteUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
     },
-  });
-}
-
-export function useIsCallerAdmin() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<boolean>({
-    queryKey: ['isCallerAdmin'],
-    queryFn: async () => {
-      if (!actor) return false;
-      return actor.isCallerAdmin();
-    },
-    enabled: !!actor && !actorFetching,
   });
 }
 
@@ -437,12 +427,40 @@ export function useSetApproval() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ user, status }: { user: Principal; status: ApprovalStatus }) => {
+    mutationFn: async (data: { user: Principal; status: ApprovalStatus }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.setApproval(user, status);
+      return actor.setApproval(data.user, data.status);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['approvals'] });
+    },
+  });
+}
+
+export function useGetMessages() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<Message[]>({
+    queryKey: ['messages'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getMessages();
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useSendMessage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { receiverId: string; message: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.sendMessage(data.receiverId, data.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
     },
   });
 }

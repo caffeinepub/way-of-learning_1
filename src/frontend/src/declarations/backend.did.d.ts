@@ -23,6 +23,12 @@ export interface Assignment {
   'teacherId' : string,
 }
 export type AssignmentId = bigint;
+export interface AssignmentSubmission {
+  'studentId' : string,
+  'assignmentId' : AssignmentId,
+  'submissionDate' : bigint,
+  'submissionFile' : ExternalBlob,
+}
 export type Attachment = { 'file' : ExternalBlob } |
   { 'videoLink' : string };
 export type AttendanceId = bigint;
@@ -54,6 +60,12 @@ export interface Grade {
   'comments' : [] | [string],
 }
 export type MaterialId = bigint;
+export interface Message {
+  'receiverId' : string,
+  'message' : string,
+  'timestamp' : bigint,
+  'senderId' : string,
+}
 export interface Session {
   'id' : SessionId,
   'title' : string,
@@ -134,6 +146,10 @@ export interface _SERVICE {
   'deleteUser' : ActorMethod<[Principal], undefined>,
   'enrollInClass' : ActorMethod<[string], undefined>,
   'getAllUsers' : ActorMethod<[], Array<UserProfile>>,
+  'getAssignmentSubmissions' : ActorMethod<
+    [AssignmentId],
+    Array<AssignmentSubmission>
+  >,
   'getAssignments' : ActorMethod<[], Array<Assignment>>,
   'getAttendanceRecords' : ActorMethod<[], Array<AttendanceRecord>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -141,6 +157,7 @@ export interface _SERVICE {
   'getClassById' : ActorMethod<[ClassId], Class>,
   'getClasses' : ActorMethod<[], Array<Class>>,
   'getGrades' : ActorMethod<[], Array<Grade>>,
+  'getMessages' : ActorMethod<[], Array<Message>>,
   'getSessions' : ActorMethod<[], Array<Session>>,
   'getStudyMaterials' : ActorMethod<[], Array<StudyMaterial>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
@@ -158,6 +175,7 @@ export interface _SERVICE {
   >,
   'requestApproval' : ActorMethod<[], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'sendMessage' : ActorMethod<[string, string], undefined>,
   'setApproval' : ActorMethod<[Principal, ApprovalStatus], undefined>,
   'submitAssignment' : ActorMethod<[AssignmentId, ExternalBlob], undefined>,
   'uploadStudyMaterial' : ActorMethod<

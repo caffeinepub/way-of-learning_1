@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useActor } from './hooks/useActor';
-import { useGetCallerUserProfile } from './hooks/useQueries';
+import { useGetCallerUserProfile, useIsCallerApproved } from './hooks/useQueries';
 import { createRouter, RouterProvider, useNavigate } from '@tanstack/react-router';
 import { createRootRoute, createRoute, Outlet } from '@tanstack/react-router';
 import LandingPage from './pages/shared/LandingPage';
@@ -19,10 +19,17 @@ import AttendancePage from './pages/student/AttendancePage';
 import QuizzesPage from './pages/student/QuizzesPage';
 import ProgressReportPage from './pages/student/ProgressReportPage';
 import ChildDetailPage from './pages/parent/ChildDetailPage';
+import ChildrenPage from './pages/parent/ChildrenPage';
 import MessagesPage from './pages/shared/MessagesPage';
 import CalendarPage from './pages/shared/CalendarPage';
+import DiscussionsPage from './pages/shared/DiscussionsPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import MonitoringPage from './pages/admin/MonitoringPage';
+import ApprovalRequestPage from './pages/shared/ApprovalRequestPage';
+import AssignmentsPage from './pages/student/AssignmentsPage';
+import MaterialsPage from './pages/student/MaterialsPage';
+import TeacherMaterialsPage from './pages/teacher/MaterialsPage';
+import TeacherQuizzesPage from './pages/teacher/QuizzesPage';
 import AppLayout from './components/layout/AppLayout';
 import RoleSelectionModal from './components/auth/RoleSelectionModal';
 import LoadingSpinner from './components/shared/LoadingSpinner';
@@ -156,6 +163,26 @@ const teacherSessionRoute = createRoute({
   ),
 });
 
+const teacherMaterialsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/teacher/materials',
+  component: () => (
+    <AppLayout>
+      <TeacherMaterialsPage />
+    </AppLayout>
+  ),
+});
+
+const teacherQuizzesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/teacher/quizzes',
+  component: () => (
+    <AppLayout>
+      <TeacherQuizzesPage />
+    </AppLayout>
+  ),
+});
+
 const studentRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/student',
@@ -216,6 +243,26 @@ const studentProgressRoute = createRoute({
   ),
 });
 
+const studentAssignmentsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/student/assignments',
+  component: () => (
+    <AppLayout>
+      <AssignmentsPage />
+    </AppLayout>
+  ),
+});
+
+const studentMaterialsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/student/materials',
+  component: () => (
+    <AppLayout>
+      <MaterialsPage />
+    </AppLayout>
+  ),
+});
+
 const parentRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/parent',
@@ -232,6 +279,16 @@ const parentChildRoute = createRoute({
   component: () => (
     <AppLayout>
       <ChildDetailPage />
+    </AppLayout>
+  ),
+});
+
+const parentChildrenRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/parent/children',
+  component: () => (
+    <AppLayout>
+      <ChildrenPage />
     </AppLayout>
   ),
 });
@@ -296,26 +353,53 @@ const calendarRoute = createRoute({
   ),
 });
 
+const discussionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/discussions',
+  component: () => (
+    <AppLayout>
+      <DiscussionsPage />
+    </AppLayout>
+  ),
+});
+
+const approvalRequestRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/approval-request',
+  component: () => (
+    <AppLayout>
+      <ApprovalRequestPage />
+    </AppLayout>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   teacherRoute,
   teacherClassRoute,
   teacherAssignmentRoute,
   teacherSessionRoute,
+  teacherMaterialsRoute,
+  teacherQuizzesRoute,
   studentRoute,
   studentClassRoute,
   studentGradesRoute,
   studentAttendanceRoute,
   studentQuizzesRoute,
   studentProgressRoute,
+  studentAssignmentsRoute,
+  studentMaterialsRoute,
   parentRoute,
   parentChildRoute,
+  parentChildrenRoute,
   adminRoute,
   adminUsersRoute,
   adminMonitoringRoute,
   profileRoute,
   messagesRoute,
   calendarRoute,
+  discussionsRoute,
+  approvalRequestRoute,
 ]);
 
 const router = createRouter({ routeTree });

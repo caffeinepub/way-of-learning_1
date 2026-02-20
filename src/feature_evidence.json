@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-redirect-logic-in-app-tsx-to-properly-navigate-teacher-users-to-teacher-dashboard-after-role-selection-and-profile-creation-ensuring-the-page-does-not-get-stuck-on-a-redirecting-state",
-      "featureTitle": "Fix the redirect logic in App.tsx to properly navigate Teacher users to /teacher/dashboard after role selection and profile creation, ensuring the page does not get stuck on a redirecting state",
+      "featureId": "feature-implement-fully-functional-react-router-navigation-system-with-working-tabs-buttons-and-links-across-all-user-dashboards-teacher-student-parent-admin",
+      "featureTitle": "Implement fully functional React Router navigation system with working tabs, buttons, and links across all user dashboards (Teacher, Student, Parent, Admin)",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/BottomNavigation.tsx",
+        "frontend/src/components/layout/SideNavigation.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,15 +20,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-21"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-error-handling-and-timeout-logic-to-the-role-selection-and-profile-creation-flow-in-roleselectionmodal-tsx-to-prevent-infinite-loading-states-when-the-redirect-fails",
-      "featureTitle": "Add error handling and timeout logic to the role selection and profile creation flow in RoleSelectionModal.tsx to prevent infinite loading states when the redirect fails",
+      "featureId": "feature-fix-routing-logic-for-all-feature-sections-messaging-attendance-assignments-quizzes-materials-discussions-and-calendar-across-all-applicable-dashboards",
+      "featureTitle": "Fix routing logic for all feature sections: messaging, attendance, assignments, quizzes, materials, discussions, and calendar across all applicable dashboards",
       "files": [
-        "frontend/src/components/auth/RoleSelectionModal.tsx"
+        "frontend/src/pages/shared/CalendarPage.tsx",
+        "frontend/src/pages/shared/DiscussionsPage.tsx",
+        "frontend/src/pages/shared/MessagesPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -39,13 +43,77 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-22"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-verify-that-the-usequeries-ts-mutation-for-createprofile-properly-invalidates-the-user-profile-query-cache-and-triggers-the-authentication-state-update-that-drives-the-redirect-in-app-tsx",
-      "featureTitle": "Verify that the useQueries.ts mutation for createProfile properly invalidates the user profile query cache and triggers the authentication state update that drives the redirect in App.tsx",
+      "featureId": "feature-implement-teacher-dashboard-with-complete-navigation-to-classes-sessions-assignments-materials-messaging-discussions-and-calendar",
+      "featureTitle": "Implement Teacher Dashboard with complete navigation to Classes, Sessions, Assignments, Materials, Messaging, Discussions, and Calendar",
+      "files": [
+        "frontend/src/pages/teacher/MaterialsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-student-dashboard-with-complete-navigation-to-classes-grades-attendance-assignments-quizzes-materials-messaging-discussions-and-calendar",
+      "featureTitle": "Implement Student Dashboard with complete navigation to Classes, Grades, Attendance, Assignments, Quizzes, Materials, Messaging, Discussions, and Calendar",
+      "files": [
+        "frontend/src/pages/student/AssignmentsPage.tsx",
+        "frontend/src/pages/student/MaterialsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-parent-dashboard-with-complete-navigation-to-children-s-progress-attendance-grades-messaging-with-teachers-discussions-and-calendar",
+      "featureTitle": "Implement Parent Dashboard with complete navigation to Children's Progress, Attendance, Grades, Messaging with Teachers, Discussions, and Calendar",
+      "files": [
+        "frontend/src/pages/parent/ChildrenPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-messaging-system-enabling-communication-between-teachers-and-students-and-teachers-and-parents",
+      "featureTitle": "Implement messaging system enabling communication between Teachers and Students, and Teachers and Parents",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -60,7 +128,113 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-23"
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-attendance-tracking-system-where-teachers-can-mark-attendance-and-students-parents-can-view-attendance-records",
+      "featureTitle": "Implement attendance tracking system where teachers can mark attendance and students/parents can view attendance records",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-assignments-management-system-where-teachers-can-create-assignments-students-can-submit-work-and-teachers-can-grade-submissions",
+      "featureTitle": "Implement assignments management system where teachers can create assignments, students can submit work, and teachers can grade submissions",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-quizzes-and-assessments-system-where-teachers-can-create-quizzes-and-students-can-take-them",
+      "featureTitle": "Implement quizzes and assessments system where teachers can create quizzes and students can take them",
+      "files": [
+        "frontend/src/pages/teacher/QuizzesPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-verify-complete-user-flows-for-all-four-roles-teacher-student-parent-admin-ensuring-all-features-are-accessible-and-functional",
+      "featureTitle": "Verify complete user flows for all four roles (Teacher, Student, Parent, Admin) ensuring all features are accessible and functional",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/shared/ApprovalRequestPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-14"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-creative-coherent-visual-theme-with-distinct-style-colors-typography-layout-throughout-the-platform-that-is-educational-and-professional-avoiding-generic-blue-and-purple-color-schemes",
+      "featureTitle": "Apply a creative, coherent visual theme with distinct style (colors, typography, layout) throughout the platform that is educational and professional, avoiding generic blue and purple color schemes",
+      "files": [
+        "frontend/src/components/layout/AppLayout.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-15"
       ],
       "confidence": "high"
     }

@@ -41,6 +41,12 @@ export const UserProfile = IDL.Record({
   'profilePhoto' : IDL.Opt(ExternalBlob),
   'phoneNumber' : IDL.Text,
 });
+export const AssignmentSubmission = IDL.Record({
+  'studentId' : IDL.Text,
+  'assignmentId' : AssignmentId,
+  'submissionDate' : IDL.Int,
+  'submissionFile' : ExternalBlob,
+});
 export const Assignment = IDL.Record({
   'id' : AssignmentId,
   'title' : IDL.Text,
@@ -77,6 +83,12 @@ export const Grade = IDL.Record({
   'score' : IDL.Nat,
   'assignmentId' : AssignmentId,
   'comments' : IDL.Opt(IDL.Text),
+});
+export const Message = IDL.Record({
+  'receiverId' : IDL.Text,
+  'message' : IDL.Text,
+  'timestamp' : IDL.Int,
+  'senderId' : IDL.Text,
 });
 export const Session = IDL.Record({
   'id' : SessionId,
@@ -167,6 +179,11 @@ export const idlService = IDL.Service({
   'deleteUser' : IDL.Func([IDL.Principal], [], []),
   'enrollInClass' : IDL.Func([IDL.Text], [], []),
   'getAllUsers' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
+  'getAssignmentSubmissions' : IDL.Func(
+      [AssignmentId],
+      [IDL.Vec(AssignmentSubmission)],
+      ['query'],
+    ),
   'getAssignments' : IDL.Func([], [IDL.Vec(Assignment)], ['query']),
   'getAttendanceRecords' : IDL.Func([], [IDL.Vec(AttendanceRecord)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -174,6 +191,7 @@ export const idlService = IDL.Service({
   'getClassById' : IDL.Func([ClassId], [Class], ['query']),
   'getClasses' : IDL.Func([], [IDL.Vec(Class)], ['query']),
   'getGrades' : IDL.Func([], [IDL.Vec(Grade)], ['query']),
+  'getMessages' : IDL.Func([], [IDL.Vec(Message)], ['query']),
   'getSessions' : IDL.Func([], [IDL.Vec(Session)], ['query']),
   'getStudyMaterials' : IDL.Func([], [IDL.Vec(StudyMaterial)], ['query']),
   'getUserProfile' : IDL.Func(
@@ -197,6 +215,7 @@ export const idlService = IDL.Service({
     ),
   'requestApproval' : IDL.Func([], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'sendMessage' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
   'submitAssignment' : IDL.Func([AssignmentId, ExternalBlob], [], []),
   'uploadStudyMaterial' : IDL.Func(
@@ -242,6 +261,12 @@ export const idlFactory = ({ IDL }) => {
     'profilePhoto' : IDL.Opt(ExternalBlob),
     'phoneNumber' : IDL.Text,
   });
+  const AssignmentSubmission = IDL.Record({
+    'studentId' : IDL.Text,
+    'assignmentId' : AssignmentId,
+    'submissionDate' : IDL.Int,
+    'submissionFile' : ExternalBlob,
+  });
   const Assignment = IDL.Record({
     'id' : AssignmentId,
     'title' : IDL.Text,
@@ -278,6 +303,12 @@ export const idlFactory = ({ IDL }) => {
     'score' : IDL.Nat,
     'assignmentId' : AssignmentId,
     'comments' : IDL.Opt(IDL.Text),
+  });
+  const Message = IDL.Record({
+    'receiverId' : IDL.Text,
+    'message' : IDL.Text,
+    'timestamp' : IDL.Int,
+    'senderId' : IDL.Text,
   });
   const Session = IDL.Record({
     'id' : SessionId,
@@ -368,6 +399,11 @@ export const idlFactory = ({ IDL }) => {
     'deleteUser' : IDL.Func([IDL.Principal], [], []),
     'enrollInClass' : IDL.Func([IDL.Text], [], []),
     'getAllUsers' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
+    'getAssignmentSubmissions' : IDL.Func(
+        [AssignmentId],
+        [IDL.Vec(AssignmentSubmission)],
+        ['query'],
+      ),
     'getAssignments' : IDL.Func([], [IDL.Vec(Assignment)], ['query']),
     'getAttendanceRecords' : IDL.Func(
         [],
@@ -379,6 +415,7 @@ export const idlFactory = ({ IDL }) => {
     'getClassById' : IDL.Func([ClassId], [Class], ['query']),
     'getClasses' : IDL.Func([], [IDL.Vec(Class)], ['query']),
     'getGrades' : IDL.Func([], [IDL.Vec(Grade)], ['query']),
+    'getMessages' : IDL.Func([], [IDL.Vec(Message)], ['query']),
     'getSessions' : IDL.Func([], [IDL.Vec(Session)], ['query']),
     'getStudyMaterials' : IDL.Func([], [IDL.Vec(StudyMaterial)], ['query']),
     'getUserProfile' : IDL.Func(
@@ -402,6 +439,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'requestApproval' : IDL.Func([], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'sendMessage' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
     'submitAssignment' : IDL.Func([AssignmentId, ExternalBlob], [], []),
     'uploadStudyMaterial' : IDL.Func(

@@ -11,7 +11,9 @@ import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import UserApproval "user-approval/approval";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type ClassId = Nat;
   type SessionId = Nat;
@@ -60,6 +62,13 @@ actor {
     classSection : ?Text;
     phoneNumber : Text;
     id : Text;
+  };
+
+  public type Message = {
+    senderId : Text;
+    receiverId : Text;
+    message : Text;
+    timestamp : Int;
   };
 
   public type Class = {
@@ -173,6 +182,7 @@ actor {
   let grades = Map.empty<GradeId, Grade>();
   let attendanceRecords = Map.empty<AttendanceId, AttendanceRecord>();
   let parentChildLinks = Map.empty<Text, [Text]>();
+  let messages = Map.empty<Text, [Message]>();
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -252,6 +262,122 @@ actor {
     };
   };
 
+  // Helper function to check if two users can message each other
+  func canMessage(senderId : Text, receiverId : Text) : Bool {
+    let senderProfile = getUserProfileById(senderId);
+    let receiverProfile = getUserProfileById(receiverId);
+
+    switch (senderProfile, receiverProfile) {
+      case (?sender, ?receiver) {
+        // Teachers can message students in their classes
+        switch (sender.userType, receiver.userType) {
+          case (#teacher, #student) {
+            // Check if student is in any of teacher's classes
+            for ((_, class_) in classes.entries()) {
+              if (class_.teacherId == senderId and isStudentInClass(receiverId, class_.id)) {
+                return true;
+              };
+            };
+            false;
+          };
+          case (#student, #teacher) {
+            // Check if teacher teaches any of student's classes
+            for ((_, class_) in classes.entries()) {
+              if (class_.teacherId == receiverId and isStudentInClass(senderId, class_.id)) {
+                return true;
+              };
+            };
+            false;
+          };
+          case (#teacher, #parent) {
+            // Check if parent has children in teacher's classes
+            switch (parentChildLinks.get(receiverId)) {
+              case (?children) {
+                for ((_, class_) in classes.entries()) {
+                  if (class_.teacherId == senderId) {
+                    for (child in children.vals()) {
+                      if (isStudentInClass(child, class_.id)) {
+                        return true;
+                      };
+                    };
+                  };
+                };
+                false;
+              };
+              case (null) { false };
+            };
+          };
+          case (#parent, #teacher) {
+            // Check if parent has children in teacher's classes
+            switch (parentChildLinks.get(senderId)) {
+              case (?children) {
+                for ((_, class_) in classes.entries()) {
+                  if (class_.teacherId == receiverId) {
+                    for (child in children.vals()) {
+                      if (isStudentInClass(child, class_.id)) {
+                        return true;
+                      };
+                    };
+                  };
+                };
+                false;
+              };
+              case (null) { false };
+            };
+          };
+          case (_) { false };
+        };
+      };
+      case (_) { false };
+    };
+  };
+
+  // Messaging APIs
+  public shared ({ caller }) func sendMessage(receiverId : Text, message : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can send messages");
+    };
+
+    switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?senderProfile) {
+        // Verify sender and receiver have a valid relationship
+        if (not canMessage(senderProfile.id, receiverId)) {
+          Runtime.trap("Unauthorized: Cannot send message to this user");
+        };
+
+        let messageObj : Message = {
+          senderId = senderProfile.id;
+          receiverId = receiverId;
+          message;
+          timestamp = Time.now();
+        };
+        let existingMsgs = switch (messages.get(receiverId)) {
+          case (null) { [] };
+          case (?msgs) { msgs };
+        };
+        let updatedMsgs = existingMsgs.concat([messageObj]);
+        messages.add(receiverId, updatedMsgs);
+      };
+    };
+  };
+
+  public query ({ caller }) func getMessages() : async [Message] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view messages");
+    };
+
+    switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) {
+        switch (messages.get(profile.id)) {
+          case (null) { [] };
+          case (?msgs) { msgs };
+        };
+      };
+    };
+  };
+
   // User Profile Management
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -284,6 +410,8 @@ actor {
     };
 
     let callerProfile = userProfiles.get(caller);
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+
     switch (callerProfile) {
       case (?profile) {
         switch (profile.userType) {
@@ -312,10 +440,10 @@ actor {
         };
       };
       case (null) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
+        if (isAdmin) {
           classes.values().toArray();
         } else {
-          [];
+          Runtime.trap("User profile not found");
         };
       };
     };
@@ -395,39 +523,37 @@ actor {
       case (?c) { c };
     };
 
-    let callerProfile = userProfiles.get(caller);
     let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    if (isAdmin) {
+      return class_;
+    };
 
-    switch (callerProfile) {
-      case (?profile) {
-        switch (profile.userType) {
-          case (#teacher) {
-            if (class_.teacherId != profile.id and not isAdmin) {
-              Runtime.trap("Unauthorized: Can only view your own classes");
-            };
-          };
-          case (#student) {
-            if (not isStudentInClass(profile.id, id) and not isAdmin) {
-              Runtime.trap("Unauthorized: Can only view enrolled classes");
-            };
-          };
-          case (#parent) {
-            let children = switch (parentChildLinks.get(profile.id)) {
-              case (?c) { c };
-              case (null) { [] };
-            };
-            let hasAccess = class_.students.find<Text>(func(s) {
-              children.find<Text>(func(child) { child == s }) != null;
-            }) != null;
-            if (not hasAccess and not isAdmin) {
-              Runtime.trap("Unauthorized: Can only view classes of linked children");
-            };
-          };
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (?p) { p };
+      case (null) { Runtime.trap("User profile not found") };
+    };
+
+    switch (callerProfile.userType) {
+      case (#teacher) {
+        if (class_.teacherId != callerProfile.id) {
+          Runtime.trap("Unauthorized: Can only view your own classes");
         };
       };
-      case (null) {
-        if (not isAdmin) {
-          Runtime.trap("Unauthorized: User profile not found");
+      case (#student) {
+        if (not isStudentInClass(callerProfile.id, id)) {
+          Runtime.trap("Unauthorized: Can only view enrolled classes");
+        };
+      };
+      case (#parent) {
+        let children = switch (parentChildLinks.get(callerProfile.id)) {
+          case (?c) { c };
+          case (null) { [] };
+        };
+        let hasAccess = class_.students.find<Text>(func(s) {
+          children.find<Text>(func(child) { child == s }) != null;
+        }) != null;
+        if (not hasAccess) {
+          Runtime.trap("Unauthorized: Can only view classes of linked children");
         };
       };
     };
@@ -441,47 +567,45 @@ actor {
       Runtime.trap("Unauthorized: Only users can view sessions");
     };
 
-    let callerProfile = userProfiles.get(caller);
-    switch (callerProfile) {
-      case (?profile) {
-        switch (profile.userType) {
-          case (#teacher) {
-            sessions.values().toArray().filter(func(s) {
-              switch (classes.get(s.classId)) {
-                case (?c) { c.teacherId == profile.id };
-                case (null) { false };
-              };
-            });
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    if (isAdmin) {
+      return sessions.values().toArray();
+    };
+
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (?p) { p };
+      case (null) { Runtime.trap("User profile not found") };
+    };
+
+    switch (callerProfile.userType) {
+      case (#teacher) {
+        sessions.values().toArray().filter(func(s) {
+          switch (classes.get(s.classId)) {
+            case (?c) { c.teacherId == callerProfile.id };
+            case (null) { false };
           };
-          case (#student) {
-            sessions.values().toArray().filter(func(s) {
-              isStudentInClass(profile.id, s.classId);
-            });
-          };
-          case (#parent) {
-            let children = switch (parentChildLinks.get(profile.id)) {
-              case (?c) { c };
-              case (null) { [] };
-            };
-            sessions.values().toArray().filter(func(s) {
-              switch (classes.get(s.classId)) {
-                case (?class_) {
-                  class_.students.find<Text>(func(student) {
-                    children.find<Text>(func(child) { child == student }) != null;
-                  }) != null;
-                };
-                case (null) { false };
-              };
-            });
-          };
-        };
+        });
       };
-      case (null) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
-          sessions.values().toArray();
-        } else {
-          [];
+      case (#student) {
+        sessions.values().toArray().filter(func(s) {
+          isStudentInClass(callerProfile.id, s.classId);
+        });
+      };
+      case (#parent) {
+        let children = switch (parentChildLinks.get(callerProfile.id)) {
+          case (?c) { c };
+          case (null) { [] };
         };
+        sessions.values().toArray().filter(func(s) {
+          switch (classes.get(s.classId)) {
+            case (?class_) {
+              class_.students.find<Text>(func(student) {
+                children.find<Text>(func(child) { child == student }) != null;
+              }) != null;
+            };
+            case (null) { false };
+          };
+        });
       };
     };
   };
@@ -536,44 +660,42 @@ actor {
       Runtime.trap("Unauthorized: Only users can view study materials");
     };
 
-    let callerProfile = userProfiles.get(caller);
-    switch (callerProfile) {
-      case (?profile) {
-        switch (profile.userType) {
-          case (#teacher) {
-            studyMaterials.values().toArray().filter(func(m) {
-              m.teacherId == profile.id;
-            });
-          };
-          case (#student) {
-            studyMaterials.values().toArray().filter(func(m) {
-              isStudentInClass(profile.id, m.classId);
-            });
-          };
-          case (#parent) {
-            let children = switch (parentChildLinks.get(profile.id)) {
-              case (?c) { c };
-              case (null) { [] };
-            };
-            studyMaterials.values().toArray().filter(func(m) {
-              switch (classes.get(m.classId)) {
-                case (?class_) {
-                  class_.students.find<Text>(func(student) {
-                    children.find<Text>(func(child) { child == student }) != null;
-                  }) != null;
-                };
-                case (null) { false };
-              };
-            });
-          };
-        };
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    if (isAdmin) {
+      return studyMaterials.values().toArray();
+    };
+
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (?p) { p };
+      case (null) { Runtime.trap("User profile not found") };
+    };
+
+    switch (callerProfile.userType) {
+      case (#teacher) {
+        studyMaterials.values().toArray().filter(func(m) {
+          m.teacherId == callerProfile.id;
+        });
       };
-      case (null) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
-          studyMaterials.values().toArray();
-        } else {
-          [];
+      case (#student) {
+        studyMaterials.values().toArray().filter(func(m) {
+          isStudentInClass(callerProfile.id, m.classId);
+        });
+      };
+      case (#parent) {
+        let children = switch (parentChildLinks.get(callerProfile.id)) {
+          case (?c) { c };
+          case (null) { [] };
         };
+        studyMaterials.values().toArray().filter(func(m) {
+          switch (classes.get(m.classId)) {
+            case (?class_) {
+              class_.students.find<Text>(func(student) {
+                children.find<Text>(func(child) { child == student }) != null;
+              }) != null;
+            };
+            case (null) { false };
+          };
+        });
       };
     };
   };
@@ -623,44 +745,42 @@ actor {
       Runtime.trap("Unauthorized: Only users can view assignments");
     };
 
-    let callerProfile = userProfiles.get(caller);
-    switch (callerProfile) {
-      case (?profile) {
-        switch (profile.userType) {
-          case (#teacher) {
-            assignments.values().toArray().filter(func(a) {
-              a.teacherId == profile.id;
-            });
-          };
-          case (#student) {
-            assignments.values().toArray().filter(func(a) {
-              isStudentInClass(profile.id, a.classId);
-            });
-          };
-          case (#parent) {
-            let children = switch (parentChildLinks.get(profile.id)) {
-              case (?c) { c };
-              case (null) { [] };
-            };
-            assignments.values().toArray().filter(func(a) {
-              switch (classes.get(a.classId)) {
-                case (?class_) {
-                  class_.students.find<Text>(func(student) {
-                    children.find<Text>(func(child) { child == student }) != null;
-                  }) != null;
-                };
-                case (null) { false };
-              };
-            });
-          };
-        };
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    if (isAdmin) {
+      return assignments.values().toArray();
+    };
+
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (?p) { p };
+      case (null) { Runtime.trap("User profile not found") };
+    };
+
+    switch (callerProfile.userType) {
+      case (#teacher) {
+        assignments.values().toArray().filter(func(a) {
+          a.teacherId == callerProfile.id;
+        });
       };
-      case (null) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
-          assignments.values().toArray();
-        } else {
-          [];
+      case (#student) {
+        assignments.values().toArray().filter(func(a) {
+          isStudentInClass(callerProfile.id, a.classId);
+        });
+      };
+      case (#parent) {
+        let children = switch (parentChildLinks.get(callerProfile.id)) {
+          case (?c) { c };
+          case (null) { [] };
         };
+        assignments.values().toArray().filter(func(a) {
+          switch (classes.get(a.classId)) {
+            case (?class_) {
+              class_.students.find<Text>(func(student) {
+                children.find<Text>(func(child) { child == student }) != null;
+              }) != null;
+            };
+            case (null) { false };
+          };
+        });
       };
     };
   };
@@ -748,43 +868,103 @@ actor {
     assignmentSubmissions.add(assignmentId, existingSubmissions.concat([submission]));
   };
 
+  public query ({ caller }) func getAssignmentSubmissions(assignmentId : AssignmentId) : async [AssignmentSubmission] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view submissions");
+    };
+
+    let assignment = switch (assignments.get(assignmentId)) {
+      case (?a) { a };
+      case (null) { Runtime.trap("Assignment not found") };
+    };
+
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (?p) { p };
+      case (null) {
+        if (isAdmin) {
+          return switch (assignmentSubmissions.get(assignmentId)) {
+            case (?subs) { subs };
+            case (null) { [] };
+          };
+        };
+        Runtime.trap("User profile not found");
+      };
+    };
+
+    // Teachers can view all submissions for their assignments
+    switch (callerProfile.userType) {
+      case (#teacher) {
+        if (assignment.teacherId != callerProfile.id and not isAdmin) {
+          Runtime.trap("Unauthorized: Can only view submissions for your own assignments");
+        };
+        switch (assignmentSubmissions.get(assignmentId)) {
+          case (?subs) { subs };
+          case (null) { [] };
+        };
+      };
+      case (#student) {
+        // Students can only view their own submissions
+        switch (assignmentSubmissions.get(assignmentId)) {
+          case (?subs) {
+            subs.filter(func(s) { s.studentId == callerProfile.id });
+          };
+          case (null) { [] };
+        };
+      };
+      case (#parent) {
+        // Parents can view submissions of their linked children
+        let children = switch (parentChildLinks.get(callerProfile.id)) {
+          case (?c) { c };
+          case (null) { [] };
+        };
+        switch (assignmentSubmissions.get(assignmentId)) {
+          case (?subs) {
+            subs.filter(func(s) {
+              children.find<Text>(func(child) { child == s.studentId }) != null;
+            });
+          };
+          case (null) { [] };
+        };
+      };
+    };
+  };
+
   // Grading System
   public query ({ caller }) func getGrades() : async [Grade] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view grades");
     };
 
-    let callerProfile = userProfiles.get(caller);
-    switch (callerProfile) {
-      case (?profile) {
-        switch (profile.userType) {
-          case (#teacher) {
-            grades.values().toArray().filter(func(g) {
-              g.gradedBy == profile.id;
-            });
-          };
-          case (#student) {
-            grades.values().toArray().filter(func(g) {
-              g.studentId == profile.id;
-            });
-          };
-          case (#parent) {
-            let children = switch (parentChildLinks.get(profile.id)) {
-              case (?c) { c };
-              case (null) { [] };
-            };
-            grades.values().toArray().filter(func(g) {
-              children.find<Text>(func(child) { child == g.studentId }) != null;
-            });
-          };
-        };
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    if (isAdmin) {
+      return grades.values().toArray();
+    };
+
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (?p) { p };
+      case (null) { Runtime.trap("User profile not found") };
+    };
+
+    switch (callerProfile.userType) {
+      case (#teacher) {
+        grades.values().toArray().filter(func(g) {
+          g.gradedBy == callerProfile.id;
+        });
       };
-      case (null) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
-          grades.values().toArray();
-        } else {
-          [];
+      case (#student) {
+        grades.values().toArray().filter(func(g) {
+          g.studentId == callerProfile.id;
+        });
+      };
+      case (#parent) {
+        let children = switch (parentChildLinks.get(callerProfile.id)) {
+          case (?c) { c };
+          case (null) { [] };
         };
+        grades.values().toArray().filter(func(g) {
+          children.find<Text>(func(child) { child == g.studentId }) != null;
+        });
       };
     };
   };
@@ -816,6 +996,11 @@ actor {
       Runtime.trap("Unauthorized: Can only grade assignments for your own classes");
     };
 
+    // Verify student is enrolled in the class
+    if (not isStudentInClass(studentId, assignment.classId)) {
+      Runtime.trap("Student not enrolled in this class");
+    };
+
     switch (Nat.fromText(studentId)) {
       case (?studentNat) {
         let gradeKey = assignmentId * 1000000 + studentNat;
@@ -838,40 +1023,38 @@ actor {
       Runtime.trap("Unauthorized: Only users can view attendance records");
     };
 
-    let callerProfile = userProfiles.get(caller);
-    switch (callerProfile) {
-      case (?profile) {
-        switch (profile.userType) {
-          case (#teacher) {
-            attendanceRecords.values().toArray().filter(func(a) {
-              switch (classes.get(a.classId)) {
-                case (?c) { c.teacherId == profile.id };
-                case (null) { false };
-              };
-            });
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    if (isAdmin) {
+      return attendanceRecords.values().toArray();
+    };
+
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (?p) { p };
+      case (null) { Runtime.trap("User profile not found") };
+    };
+
+    switch (callerProfile.userType) {
+      case (#teacher) {
+        attendanceRecords.values().toArray().filter(func(a) {
+          switch (classes.get(a.classId)) {
+            case (?c) { c.teacherId == callerProfile.id };
+            case (null) { false };
           };
-          case (#student) {
-            attendanceRecords.values().toArray().filter(func(a) {
-              a.studentId == profile.id;
-            });
-          };
-          case (#parent) {
-            let children = switch (parentChildLinks.get(profile.id)) {
-              case (?c) { c };
-              case (null) { [] };
-            };
-            attendanceRecords.values().toArray().filter(func(a) {
-              children.find<Text>(func(child) { child == a.studentId }) != null;
-            });
-          };
-        };
+        });
       };
-      case (null) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
-          attendanceRecords.values().toArray();
-        } else {
-          [];
+      case (#student) {
+        attendanceRecords.values().toArray().filter(func(a) {
+          a.studentId == callerProfile.id;
+        });
+      };
+      case (#parent) {
+        let children = switch (parentChildLinks.get(callerProfile.id)) {
+          case (?c) { c };
+          case (null) { [] };
         };
+        attendanceRecords.values().toArray().filter(func(a) {
+          children.find<Text>(func(child) { child == a.studentId }) != null;
+        });
       };
     };
   };
@@ -903,6 +1086,11 @@ actor {
       Runtime.trap("Unauthorized: Can only mark attendance for your own classes");
     };
 
+    // Verify student is enrolled in the class
+    if (not isStudentInClass(studentId, classId)) {
+      Runtime.trap("Student not enrolled in this class");
+    };
+
     let newId = attendanceIdCounter.size();
     let record : AttendanceRecord = {
       attendanceId = newId;
@@ -930,9 +1118,33 @@ actor {
       case (null) { Runtime.trap("User profile not found") };
     };
 
+    // Verify student exists
+    let studentProfile = getUserProfileById(studentId);
+    switch (studentProfile) {
+      case (?profile) {
+        switch (profile.userType) {
+          case (#student) {
+            // Valid student, proceed with linking
+          };
+          case (_) {
+            Runtime.trap("User is not a student");
+          };
+        };
+      };
+      case (null) {
+        Runtime.trap("Student not found");
+      };
+    };
+
     let existingChildren = switch (parentChildLinks.get(callerProfile.id)) {
       case (?c) { c };
       case (null) { [] };
+    };
+
+    // Check if already linked
+    let alreadyLinked = existingChildren.find<Text>(func(c) { c == studentId }) != null;
+    if (alreadyLinked) {
+      Runtime.trap("Child already linked");
     };
 
     let updatedChildren = existingChildren.concat([studentId]);
@@ -983,32 +1195,30 @@ actor {
       Runtime.trap("Unauthorized: Only users can view grades");
     };
 
-    let callerProfile = userProfiles.get(caller);
-    let filteredGrades = switch (callerProfile) {
-      case (?profile) {
-        switch (profile.userType) {
-          case (#teacher) {
-            grades.values().toArray().filter(func(g) { g.gradedBy == profile.id });
-          };
-          case (#student) {
-            grades.values().toArray().filter(func(g) { g.studentId == profile.id });
-          };
-          case (#parent) {
-            let children = switch (parentChildLinks.get(profile.id)) {
-              case (?c) { c };
-              case (null) { [] };
-            };
-            grades.values().toArray().filter(func(g) {
-              children.find<Text>(func(child) { child == g.studentId }) != null;
-            });
-          };
-        };
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    let filteredGrades = if (isAdmin) {
+      grades.values().toArray();
+    } else {
+      let callerProfile = switch (userProfiles.get(caller)) {
+        case (?p) { p };
+        case (null) { Runtime.trap("User profile not found") };
       };
-      case (null) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
-          grades.values().toArray();
-        } else {
-          [];
+
+      switch (callerProfile.userType) {
+        case (#teacher) {
+          grades.values().toArray().filter(func(g) { g.gradedBy == callerProfile.id });
+        };
+        case (#student) {
+          grades.values().toArray().filter(func(g) { g.studentId == callerProfile.id });
+        };
+        case (#parent) {
+          let children = switch (parentChildLinks.get(callerProfile.id)) {
+            case (?c) { c };
+            case (null) { [] };
+          };
+          grades.values().toArray().filter(func(g) {
+            children.find<Text>(func(child) { child == g.studentId }) != null;
+          });
         };
       };
     };
@@ -1018,3 +1228,4 @@ actor {
     });
   };
 };
+

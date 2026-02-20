@@ -1,8 +1,11 @@
 import { useGetCallerUserProfile } from '../../hooks/useQueries';
+import { useNavigate, useLocation } from '@tanstack/react-router';
 import { Home, BookOpen, Calendar, MessageSquare, User } from 'lucide-react';
 
 export default function BottomNavigation() {
   const { data: userProfile } = useGetCallerUserProfile();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const getNavItems = () => {
     const userType = userProfile?.userType;
@@ -45,7 +48,9 @@ export default function BottomNavigation() {
   const navItems = getNavItems();
 
   const handleNavigate = (path: string) => {
-    window.location.hash = `#${path}`;
+    navigate({ to: path }).catch((err) => {
+      console.error('[BottomNavigation] Navigation error:', err);
+    });
   };
 
   return (
@@ -53,7 +58,7 @@ export default function BottomNavigation() {
       <div className="flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = window.location.hash.includes(item.path);
+          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
           return (
             <button

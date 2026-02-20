@@ -1,82 +1,293 @@
 {
   "kind": "build_request",
-  "title": "Fix Teacher role redirect after authentication",
+  "title": "Build Way of Learning Educational Platform with Complete Navigation",
   "projectName": "Way of Learning",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-21",
-      "text": "Fix the redirect logic in App.tsx to properly navigate Teacher users to /teacher/dashboard after role selection and profile creation, ensuring the page does not get stuck on a redirecting state",
+      "id": "REQ-1",
+      "text": "Implement fully functional React Router navigation system with working tabs, buttons, and links across all user dashboards (Teacher, Student, Parent, Admin)",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5",
-          "msg-6",
-          "msg-7"
-        ],
-        "quotes": [
-          "After selecting the role the webpage is stuck in redirecting page",
-          "Teachers role"
+          "msg-1"
         ]
       },
       "acceptanceCriteria": [
-        "After a teacher completes Internet Identity authentication and selects the Teacher role, they are redirected to /teacher/dashboard within 2 seconds",
-        "No intermediate loading or redirecting page remains visible after role selection",
-        "The redirect flow completes successfully for Teacher role without hanging or timing out",
-        "Student and Parent role redirects continue to work as expected"
+        "All navigation tabs are clickable and route to correct pages",
+        "All buttons trigger proper navigation actions",
+        "All links navigate to appropriate destinations",
+        "Browser back/forward buttons work correctly",
+        "Active routes are visually highlighted in navigation"
       ]
     },
     {
-      "id": "REQ-22",
-      "text": "Add error handling and timeout logic to the role selection and profile creation flow in RoleSelectionModal.tsx to prevent infinite loading states when the redirect fails",
+      "id": "REQ-2",
+      "text": "Fix routing logic for all feature sections: messaging, attendance, assignments, quizzes, materials, discussions, and calendar across all applicable dashboards",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5",
-          "msg-6"
-        ],
-        "quotes": [
-          "After selecting the role the webpage is stuck in redirecting page"
+          "msg-1"
         ]
       },
       "acceptanceCriteria": [
-        "If profile creation or role selection takes longer than 10 seconds, display an error message to the user",
-        "User receives clear feedback if the redirect fails with an option to retry",
-        "Console logs capture any errors during the authentication and redirect process for debugging"
+        "Messaging routes work from all dashboards",
+        "Attendance routes function correctly for students and teachers",
+        "Assignment routes navigate properly for teachers and students",
+        "Quiz routes work for relevant user roles",
+        "Materials routes function correctly",
+        "Discussion forum routes work",
+        "Calendar routes navigate properly from all dashboards"
       ]
     },
     {
-      "id": "REQ-23",
-      "text": "Verify that the useQueries.ts mutation for createProfile properly invalidates the user profile query cache and triggers the authentication state update that drives the redirect in App.tsx",
+      "id": "REQ-3",
+      "text": "Implement Teacher Dashboard with complete navigation to Classes, Sessions, Assignments, Materials, Messaging, Discussions, and Calendar",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5",
-          "msg-6"
-        ],
-        "quotes": [
-          "After selecting the role the webpage is stuck in redirecting page"
+          "msg-1"
         ]
       },
       "acceptanceCriteria": [
-        "After createProfile mutation succeeds, the profile query is invalidated and refetched",
-        "The App.tsx component receives the updated profile data with the Teacher role",
-        "The routing logic in App.tsx correctly evaluates the Teacher role and navigates to /teacher/dashboard"
+        "Dashboard displays overview statistics",
+        "All navigation items route to correct pages",
+        "Class management features are accessible",
+        "Session scheduling is accessible",
+        "Assignment creation is accessible"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement Student Dashboard with complete navigation to Classes, Grades, Attendance, Assignments, Quizzes, Materials, Messaging, Discussions, and Calendar",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard displays student overview statistics",
+        "All navigation items route to correct pages",
+        "Class enrollment features are accessible",
+        "Grade viewing is accessible",
+        "Assignment submission is accessible"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement Parent Dashboard with complete navigation to Children's Progress, Attendance, Grades, Messaging with Teachers, Discussions, and Calendar",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard displays linked children overview",
+        "All navigation items route to correct pages",
+        "Child linking functionality is accessible",
+        "Children's progress reports are accessible",
+        "Messaging with teachers is accessible"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Implement Admin Dashboard with complete navigation to User Management, Monitoring, System Analytics, and all administrative features",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard displays platform statistics",
+        "User management page is accessible",
+        "Monitoring features are accessible",
+        "Admin can view all users by role",
+        "Admin login functionality works correctly"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Implement messaging system enabling communication between Teachers and Students, and Teachers and Parents",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Teachers can send messages to students",
+        "Teachers can send messages to parents",
+        "Students can receive and reply to teacher messages",
+        "Parents can receive and reply to teacher messages",
+        "Message history is persisted and retrievable",
+        "Unread message indicators are displayed"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Implement attendance tracking system where teachers can mark attendance and students/parents can view attendance records",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Teachers can mark students present/absent for sessions",
+        "Students can view their attendance records",
+        "Parents can view their children's attendance records",
+        "Attendance statistics are calculated and displayed",
+        "Attendance data is persisted correctly"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Implement assignments management system where teachers can create assignments, students can submit work, and teachers can grade submissions",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Teachers can create assignments with title, description, due date, and points",
+        "Students can view assignments for their classes",
+        "Students can submit assignment work",
+        "Teachers can view submissions and assign grades",
+        "Assignment status (pending, submitted, graded) is tracked",
+        "Due date notifications are displayed"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Implement quizzes and assessments system where teachers can create quizzes and students can take them",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Teachers can create quizzes with multiple questions",
+        "Students can view available quizzes",
+        "Students can take quizzes and submit answers",
+        "Quiz results are automatically calculated",
+        "Quiz scores are stored and viewable by teachers and students"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Implement learning materials library where teachers can upload materials and students can access them",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Teachers can upload files as study materials",
+        "Teachers can add video links as materials",
+        "Students can view and download materials for their classes",
+        "Materials are organized by class",
+        "Material metadata (title, type, upload date) is displayed"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Implement discussion forums where teachers and students can participate in class discussions",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Teachers can create discussion topics",
+        "Students can post in discussions",
+        "Teachers can moderate discussions",
+        "Discussion posts are threaded or organized",
+        "Users can view discussion history"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Implement calendar and scheduling system displaying sessions, assignments, quizzes, and important dates for all user roles",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Calendar displays scheduled sessions",
+        "Calendar shows assignment due dates",
+        "Calendar shows quiz dates",
+        "Calendar is filterable by event type",
+        "Users can view daily, weekly, and monthly views",
+        "Calendar events are clickable for details"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Verify complete user flows for all four roles (Teacher, Student, Parent, Admin) ensuring all features are accessible and functional",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Teachers can complete full workflow: create class → schedule session → upload materials → create assignment → grade work",
+        "Students can complete full workflow: enroll in class → attend session → access materials → submit assignment → view grades",
+        "Parents can complete full workflow: link child → view child's progress → view attendance → message teacher",
+        "Admins can complete full workflow: view all users → manage platform → monitor activity"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Apply a creative, coherent visual theme with distinct style (colors, typography, layout) throughout the platform that is educational and professional, avoiding generic blue and purple color schemes",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Consistent color palette applied across all pages",
+        "Typography choices enhance readability",
+        "Layout patterns are consistent",
+        "Design feels cohesive and purpose-built for education",
+        "Visual hierarchy guides users effectively"
       ]
     }
   ],
   "constraints": [
-    "Do not modify the Internet Identity authentication flow in useInternetIdentity.ts",
-    "Preserve the existing role selection UI in RoleSelectionModal.tsx",
-    "Maintain compatibility with Student and Parent role redirect flows"
+    "Use Internet Identity for authentication (passkeys, Google, Apple, Microsoft login)",
+    "Maintain single-actor Motoko backend architecture",
+    "Use React Router for all navigation",
+    "Preserve existing Internet Identity hooks and actor management",
+    "Do not edit immutable UI component sources in frontend/src/components/ui"
   ],
   "nonGoals": [
-    "Changing the overall authentication architecture",
-    "Adding new roles beyond Teacher, Student, and Parent",
-    "Implementing server-side redirects"
+    "Real-time WebSocket messaging",
+    "External database integrations",
+    "Third-party authentication providers beyond Internet Identity",
+    "Mobile native applications",
+    "Video conferencing integration",
+    "Email notifications",
+    "SMS notifications"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Educational platform hero illustration showing diverse students and teachers collaborating (hero-learning.dim_1200x600.png)",
+      "Teacher dashboard icon with clipboard and checklist illustration (icon-teacher.dim_256x256.png)",
+      "Student dashboard icon with books and graduation cap illustration (icon-student.dim_256x256.png)",
+      "Parent dashboard icon with parent and child silhouette illustration (icon-parent.dim_256x256.png)",
+      "Admin dashboard icon with gear and user management illustration (icon-admin.dim_256x256.png)"
+    ],
     "edits": []
   }
 }

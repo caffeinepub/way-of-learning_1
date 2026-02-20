@@ -1,54 +1,419 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Teacher role redirect after authentication",
+  "title": "Fix Navigation and Routing System for Way of Learning Platform",
   "requirements": [
     {
-      "id": "REQ-21",
-      "summary": "Fix the redirect logic in App.tsx to properly navigate Teacher users to /teacher/dashboard after role selection and profile creation",
+      "id": "REQ-1",
+      "summary": "Implement fully functional React Router navigation system with working tabs, buttons, and links across all user dashboards",
       "acceptanceCriteria": [
-        "After a teacher completes Internet Identity authentication and selects the Teacher role, they are redirected to /teacher/dashboard within 2 seconds",
-        "No intermediate loading or redirecting page remains visible after role selection",
-        "The redirect flow completes successfully for Teacher role without hanging or timing out",
-        "Student and Parent role redirects continue to work as expected"
+        "All navigation tabs are clickable and route to correct pages",
+        "All buttons trigger proper navigation actions",
+        "All links navigate to appropriate destinations",
+        "Browser back/forward buttons work correctly",
+        "Active routes are visually highlighted in navigation"
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Fix the redirect logic to properly handle Teacher role navigation after profile creation. Review the current conditional rendering logic that determines when to show the landing page, role selection modal, or dashboard routes. Ensure that after a Teacher user completes profile creation, the routing evaluates the updated profile state and navigates to /teacher/dashboard without getting stuck in a redirecting state. Add debug logging to trace the authentication state flow and profile updates during the redirect process."
+          "description": "Fix route definitions and ensure all dashboard routes are properly configured with correct paths for teacher, student, parent, and admin dashboards. Add missing routes for messaging, calendar, discussions, and all feature pages. Ensure route guards check user approval status and redirect unapproved users appropriately."
+        },
+        {
+          "path": "frontend/src/components/layout/SideNavigation.tsx",
+          "operation": "modify",
+          "description": "Update navigation item definitions to use correct route paths matching App.tsx routes. Add missing navigation items for discussions and ensure all links use proper React Router Link or navigation hooks. Fix active route highlighting logic to properly detect current location."
+        },
+        {
+          "path": "frontend/src/components/layout/BottomNavigation.tsx",
+          "operation": "modify",
+          "description": "Update mobile navigation items to use correct route paths. Ensure navigation actions properly trigger route changes and active states are correctly highlighted based on current location."
         }
       ]
     },
     {
-      "id": "REQ-22",
-      "summary": "Add error handling and timeout logic to the role selection and profile creation flow in RoleSelectionModal.tsx to prevent infinite loading states",
+      "id": "REQ-2",
+      "summary": "Fix routing logic for all feature sections across all applicable dashboards",
       "acceptanceCriteria": [
-        "If profile creation or role selection takes longer than 10 seconds, display an error message to the user",
-        "User receives clear feedback if the redirect fails with an option to retry",
-        "Console logs capture any errors during the authentication and redirect process for debugging"
+        "Messaging routes work from all dashboards",
+        "Attendance routes function correctly for students and teachers",
+        "Assignment routes navigate properly for teachers and students",
+        "Quiz routes work for relevant user roles",
+        "Materials routes function correctly",
+        "Discussion forum routes work",
+        "Calendar routes navigate properly from all dashboards"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/auth/RoleSelectionModal.tsx",
+          "path": "frontend/src/pages/shared/MessagesPage.tsx",
           "operation": "modify",
-          "description": "Add timeout handling to the profile creation mutation flow. Implement a 10-second timeout that displays an error message if the profile creation takes too long. Add error state management with clear user feedback including retry functionality. Wrap the mutation calls in try-catch blocks and add console.error logging for debugging. Ensure the modal provides actionable feedback if the backend call fails or times out, preventing users from being stuck in a loading state."
+          "description": "Implement full messaging UI with conversation list, message thread view, and compose functionality. Use authorization component to ensure only approved users can send messages. Integrate with backend getMessages and sendMessage capabilities. Display messages filtered by current user role (teacher-student, teacher-parent communications)."
+        },
+        {
+          "path": "frontend/src/pages/shared/CalendarPage.tsx",
+          "operation": "modify",
+          "description": "Implement calendar view displaying sessions, assignment due dates, and quiz dates. Create month/week/day view toggle. Make calendar events clickable to navigate to detail pages. Filter events based on user role (teachers see their sessions, students see enrolled class events)."
+        },
+        {
+          "path": "frontend/src/pages/shared/DiscussionsPage.tsx",
+          "operation": "create",
+          "description": "Create discussion forum page with topic list, post threading, and moderation features. Use authorization component to verify user approval before allowing posts. Teachers can create topics and moderate; students can view and post replies. Include navigation from all applicable dashboards."
+        },
+        {
+          "path": "frontend/src/pages/teacher/SessionDetailPage.tsx",
+          "operation": "modify",
+          "description": "Implement attendance marking interface for teachers. Display student list with attendance status buttons (present, absent, late). Integrate with backend markAttendance capability. Show session details and provide save/update functionality."
+        },
+        {
+          "path": "frontend/src/pages/teacher/AssignmentDetailPage.tsx",
+          "operation": "modify",
+          "description": "Implement grading interface for teachers. Display assignment submissions list with student names. Allow teachers to enter scores and comments, then submit grades via backend gradeAssignment capability. Show submission files with download/preview options."
+        },
+        {
+          "path": "frontend/src/pages/student/QuizzesPage.tsx",
+          "operation": "modify",
+          "description": "Implement quiz listing and quiz-taking interface for students. Display available quizzes with status (not started, in progress, completed). Create quiz detail page for taking quizzes and viewing results. Note: Backend quiz storage needs to be added in separate backend implementation."
         }
       ]
     },
     {
-      "id": "REQ-23",
-      "summary": "Verify that the useQueries.ts mutation for createProfile properly invalidates the user profile query cache and triggers the authentication state update that drives the redirect in App.tsx",
+      "id": "REQ-3",
+      "summary": "Implement Teacher Dashboard with complete navigation to all features",
       "acceptanceCriteria": [
-        "After createProfile mutation succeeds, the profile query is invalidated and refetched",
-        "The App.tsx component receives the updated profile data with the Teacher role",
-        "The routing logic in App.tsx correctly evaluates the Teacher role and navigates to /teacher/dashboard"
+        "Dashboard displays overview statistics",
+        "All navigation items route to correct pages",
+        "Class management features are accessible",
+        "Session scheduling is accessible",
+        "Assignment creation is accessible"
       ],
       "file_operations": [
+        {
+          "path": "frontend/src/pages/teacher/TeacherDashboard.tsx",
+          "operation": "modify",
+          "description": "Add navigation buttons or quick links to all teacher features: classes, sessions, assignments, materials, messaging, discussions, and calendar. Ensure all dashboard cards are clickable and navigate to relevant pages. Verify authorization component approval check is in place."
+        },
+        {
+          "path": "frontend/src/pages/teacher/MaterialsPage.tsx",
+          "operation": "create",
+          "description": "Create materials management page for teachers showing all uploaded study materials across classes. Include upload modal trigger, material cards with download/delete actions, and filtering by class."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Implement Student Dashboard with complete navigation to all features",
+      "acceptanceCriteria": [
+        "Dashboard displays student overview statistics",
+        "All navigation items route to correct pages",
+        "Class enrollment features are accessible",
+        "Grade viewing is accessible",
+        "Assignment submission is accessible"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/student/StudentDashboard.tsx",
+          "operation": "modify",
+          "description": "Add navigation buttons or quick links to all student features: classes, grades, attendance, assignments, quizzes, materials, messaging, discussions, and calendar. Ensure dashboard cards navigate to correct pages. Keep class enrollment modal functionality."
+        },
+        {
+          "path": "frontend/src/pages/student/AssignmentsPage.tsx",
+          "operation": "create",
+          "description": "Create student assignments page displaying all assignments across enrolled classes. Show assignment status (pending, submitted, graded), due dates, and scores. Include assignment submission modal with file upload using ExternalBlob. Integrate with backend submitAssignment capability. Verify blob-storage component usage instructions before implementing file upload."
+        },
+        {
+          "path": "frontend/src/pages/student/MaterialsPage.tsx",
+          "operation": "create",
+          "description": "Create student materials page showing all study materials from enrolled classes. Display material cards with download/view actions. Filter by class. Use backend getStudyMaterials capability and handle both file attachments and video links."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Implement Parent Dashboard with complete navigation to all features",
+      "acceptanceCriteria": [
+        "Dashboard displays linked children overview",
+        "All navigation items route to correct pages",
+        "Child linking functionality is accessible",
+        "Children's progress reports are accessible",
+        "Messaging with teachers is accessible"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/parent/ParentDashboard.tsx",
+          "operation": "modify",
+          "description": "Add children overview cards displaying each linked child's key statistics (attendance rate, grade average, upcoming assignments). Include navigation to child detail pages. Add quick links to messaging and calendar. Keep child linking modal functionality."
+        },
+        {
+          "path": "frontend/src/pages/parent/ChildDetailPage.tsx",
+          "operation": "modify",
+          "description": "Implement full child detail view showing attendance records, grades, assignments, and progress metrics for the selected child. Use childId from route params to filter data. Include navigation back to parent dashboard."
+        },
+        {
+          "path": "frontend/src/pages/parent/ChildrenPage.tsx",
+          "operation": "create",
+          "description": "Create page listing all linked children with summary cards. Each card shows child name, class, recent attendance, and grade average. Cards navigate to individual ChildDetailPage."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Implement Admin Dashboard with complete navigation to all administrative features",
+      "acceptanceCriteria": [
+        "Dashboard displays platform statistics",
+        "User management page is accessible",
+        "Monitoring features are accessible",
+        "Admin can view all users by role",
+        "Admin login functionality works correctly"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/admin/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Add quick action buttons for common admin tasks (approve pending users, view reports). Display recent activity feed. Ensure navigation to user management and monitoring pages works. Use authorization component to verify admin role."
+        },
+        {
+          "path": "frontend/src/pages/admin/UserManagementPage.tsx",
+          "operation": "modify",
+          "description": "Enhance user management page with approval workflow UI. Display user list with approval status badges. Add approve/reject buttons for pending users using backend setApproval capability. Include role assignment functionality using assignCallerUserRole. Add user filtering by approval status and role. Use authorization and user-approval components as required."
+        },
+        {
+          "path": "frontend/src/pages/admin/MonitoringPage.tsx",
+          "operation": "modify",
+          "description": "Implement platform monitoring dashboard showing activity metrics, user statistics by role, class enrollment trends, and system health indicators. Display charts and tables summarizing platform usage."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Implement messaging system enabling communication between Teachers and Students, and Teachers and Parents",
+      "acceptanceCriteria": [
+        "Teachers can send messages to students",
+        "Teachers can send messages to parents",
+        "Students can receive and reply to teacher messages",
+        "Parents can receive and reply to teacher messages",
+        "Message history is persisted and retrievable",
+        "Unread message indicators are displayed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/shared/MessageThread.tsx",
+          "operation": "create",
+          "description": "Create message thread component displaying conversation history with sender names, timestamps, and message content. Include reply input field and send button. Integrate with backend sendMessage capability."
+        },
+        {
+          "path": "frontend/src/components/shared/ConversationList.tsx",
+          "operation": "create",
+          "description": "Create conversation list component showing recent conversations with last message preview and timestamp. Display unread message count badges. Make items clickable to open message thread."
+        },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Review and fix the saveCallerUserProfile mutation to ensure proper query invalidation. Verify that the mutation's onSuccess callback invalidates the 'currentUserProfile' query key, triggering a refetch of the user profile. Add error handling and logging to track mutation success/failure. Ensure the mutation properly awaits the backend call and handles the response before triggering cache invalidation. This will ensure App.tsx receives the updated profile state with the Teacher role, enabling the correct redirect flow."
+          "description": "Add useSendMessage mutation hook that calls backend sendMessage capability. Ensure query invalidation refreshes message list after sending."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Implement attendance tracking system where teachers can mark attendance and students/parents can view attendance records",
+      "acceptanceCriteria": [
+        "Teachers can mark students present/absent for sessions",
+        "Students can view their attendance records",
+        "Parents can view their children's attendance records",
+        "Attendance statistics are calculated and displayed",
+        "Attendance data is persisted correctly"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/teacher/AttendanceForm.tsx",
+          "operation": "create",
+          "description": "Create attendance marking form component for teachers. Display student list with radio buttons or toggle for attendance status (present, absent, late). Include bulk actions (mark all present). Integrate with backend markAttendance capability."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add useMarkAttendance mutation hook that calls backend markAttendance capability. Ensure proper query invalidation to refresh attendance records after marking."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Implement assignments management system where teachers can create assignments, students can submit work, and teachers can grade submissions",
+      "acceptanceCriteria": [
+        "Teachers can create assignments with title, description, due date, and points",
+        "Students can view assignments for their classes",
+        "Students can submit assignment work",
+        "Teachers can view submissions and assign grades",
+        "Assignment status (pending, submitted, graded) is tracked",
+        "Due date notifications are displayed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/student/AssignmentSubmissionModal.tsx",
+          "operation": "create",
+          "description": "Create assignment submission modal for students. Include file upload with progress tracking using ExternalBlob from blob-storage component. Display assignment details (title, description, due date, points). Integrate with backend submitAssignment capability. Verify blob-storage component usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/teacher/GradingForm.tsx",
+          "operation": "create",
+          "description": "Create grading form component for teachers. Display student submission file with download/preview option. Include score input, comments textarea, and submit button. Integrate with backend gradeAssignment capability."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add useSubmitAssignment and useGradeAssignment mutation hooks. Ensure proper query invalidation to refresh assignment and grade lists after mutations."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Implement quizzes and assessments system where teachers can create quizzes and students can take them",
+      "acceptanceCriteria": [
+        "Teachers can create quizzes with multiple questions",
+        "Students can view available quizzes",
+        "Students can take quizzes and submit answers",
+        "Quiz results are automatically calculated",
+        "Quiz scores are stored and viewable by teachers and students"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/teacher/QuizzesPage.tsx",
+          "operation": "create",
+          "description": "Create quiz management page for teachers. Display quiz list with creation modal trigger. Include quiz editing and deletion actions. Note: Backend quiz storage and grading capabilities need to be added separately."
+        },
+        {
+          "path": "frontend/src/components/teacher/QuizCreationModal.tsx",
+          "operation": "create",
+          "description": "Create quiz creation modal for teachers. Include fields for quiz title, questions, answer options, correct answers, and point values. Support multiple question types if backend supports it."
+        },
+        {
+          "path": "frontend/src/components/student/QuizTakingInterface.tsx",
+          "operation": "create",
+          "description": "Create quiz-taking interface component for students. Display questions one at a time or all together. Include answer selection inputs and submit button. Show results after submission."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Implement learning materials library where teachers can upload materials and students can access them",
+      "acceptanceCriteria": [
+        "Teachers can upload files as study materials",
+        "Teachers can add video links as materials",
+        "Students can view and download materials for their classes",
+        "Materials are organized by class",
+        "Material metadata (title, type, upload date) is displayed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/teacher/MaterialUploadModal.tsx",
+          "operation": "modify",
+          "description": "Verify existing material upload modal properly handles ExternalBlob file conversion and upload progress tracking. Ensure both file and video link tabs work correctly. Verify blob-storage component usage instructions are followed for file uploads."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Implement discussion forums where teachers and students can participate in class discussions",
+      "acceptanceCriteria": [
+        "Teachers can create discussion topics",
+        "Students can post in discussions",
+        "Teachers can moderate discussions",
+        "Discussion posts are threaded or organized",
+        "Users can view discussion history"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/shared/DiscussionThread.tsx",
+          "operation": "create",
+          "description": "Create discussion thread component showing posts in chronological or threaded order. Display author names, timestamps, and post content. Include reply functionality and moderation options for teachers."
+        },
+        {
+          "path": "frontend/src/components/shared/TopicCreationModal.tsx",
+          "operation": "create",
+          "description": "Create topic creation modal for teachers. Include fields for topic title and description. Associate with specific class if needed."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Implement calendar and scheduling system displaying sessions, assignments, quizzes, and important dates for all user roles",
+      "acceptanceCriteria": [
+        "Calendar displays scheduled sessions",
+        "Calendar shows assignment due dates",
+        "Calendar shows quiz dates",
+        "Calendar is filterable by event type",
+        "Users can view daily, weekly, and monthly views",
+        "Calendar events are clickable for details"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/shared/CalendarView.tsx",
+          "operation": "create",
+          "description": "Create calendar view component with month/week/day toggle. Display events (sessions, assignments, quizzes) with color coding by type. Make events clickable to navigate to detail pages. Include event type filters."
+        },
+        {
+          "path": "frontend/src/components/shared/CalendarEvent.tsx",
+          "operation": "create",
+          "description": "Create calendar event component for rendering individual events in calendar grid. Display event title, time, and type indicator. Support click navigation to event detail page."
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Verify complete user flows for all four roles ensuring all features are accessible and functional",
+      "acceptanceCriteria": [
+        "Teachers can complete full workflow: create class → schedule session → upload materials → create assignment → grade work",
+        "Students can complete full workflow: enroll in class → attend session → access materials → submit assignment → view grades",
+        "Parents can complete full workflow: link child → view child's progress → view attendance → message teacher",
+        "Admins can complete full workflow: view all users → manage platform → monitor activity"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add comprehensive route guards that check user approval status using authorization and user-approval components. Redirect unapproved users to approval request page. Ensure admin routes are protected with admin-only checks."
+        },
+        {
+          "path": "frontend/src/pages/shared/ApprovalRequestPage.tsx",
+          "operation": "create",
+          "description": "Create approval request page for unapproved users. Display approval status (pending/rejected). Include request approval button that calls backend requestApproval capability. Show explanatory message about approval process. Use user-approval component as required."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Apply a creative, coherent visual theme throughout the platform that is educational and professional",
+      "acceptanceCriteria": [
+        "Consistent color palette applied across all pages",
+        "Typography choices enhance readability",
+        "Layout patterns are consistent",
+        "Design feels cohesive and purpose-built for education",
+        "Visual hierarchy guides users effectively"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Update CSS variables to implement a creative educational color scheme avoiding generic blue/purple. Consider warm earth tones (terracotta, sage green, warm amber) or vibrant educational palette (coral, teal, golden yellow). Define consistent spacing scale and typography hierarchy."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Update Tailwind theme configuration to match new color palette. Define custom color scales using OKLCH for better color consistency. Add custom typography settings for educational readability."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Apply new visual theme to layout components (header, navigation). Ensure consistent spacing, typography, and color usage. Add themed accent elements that reinforce educational purpose."
+        },
+        {
+          "path": "frontend/src/pages/shared/LandingPage.tsx",
+          "operation": "modify",
+          "description": "Redesign landing page with new visual theme. Wire in generated hero image from frontend/public/assets/generated/hero-education.dim_1200x600.png. Wire in role icon images for feature cards: frontend/public/assets/generated/icon-teacher.dim_128x128.png, frontend/public/assets/generated/icon-student.dim_128x128.png, and frontend/public/assets/generated/icon-parent.dim_128x128.png. Ensure cohesive branding and visual hierarchy."
+        },
+        {
+          "path": "frontend/src/components/shared/DashboardCard.tsx",
+          "operation": "modify",
+          "description": "Update dashboard card styling to match new theme. Adjust color variants to use new palette. Ensure consistent spacing and typography."
         }
       ]
     }

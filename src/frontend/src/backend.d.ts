@@ -23,6 +23,12 @@ export interface Class {
 }
 export type SessionId = bigint;
 export type AttendanceId = bigint;
+export interface AssignmentSubmission {
+    studentId: string;
+    assignmentId: AssignmentId;
+    submissionDate: bigint;
+    submissionFile: ExternalBlob;
+}
 export type MaterialId = bigint;
 export interface Grade {
     studentId: string;
@@ -58,16 +64,13 @@ export interface StudyMaterial {
     teacherId: string;
     material: Attachment;
 }
-export type AssignmentId = bigint;
-export interface Assignment {
-    id: AssignmentId;
-    title: string;
-    maxPoints: bigint;
-    dueDate: bigint;
-    description: string;
-    classId: ClassId;
-    teacherId: string;
+export interface Message {
+    receiverId: string;
+    message: string;
+    timestamp: bigint;
+    senderId: string;
 }
+export type AssignmentId = bigint;
 export type ClassId = bigint;
 export interface AttendanceRecord {
     status: AttendanceStatus;
@@ -76,6 +79,15 @@ export interface AttendanceRecord {
     classId: ClassId;
     sessionId: SessionId;
     attendanceId: AttendanceId;
+}
+export interface Assignment {
+    id: AssignmentId;
+    title: string;
+    maxPoints: bigint;
+    dueDate: bigint;
+    description: string;
+    classId: ClassId;
+    teacherId: string;
 }
 export interface UserProfile {
     id: string;
@@ -114,6 +126,7 @@ export interface backendInterface {
     deleteUser(userPrincipal: Principal): Promise<void>;
     enrollInClass(enrollmentCode: string): Promise<void>;
     getAllUsers(): Promise<Array<UserProfile>>;
+    getAssignmentSubmissions(assignmentId: AssignmentId): Promise<Array<AssignmentSubmission>>;
     getAssignments(): Promise<Array<Assignment>>;
     getAttendanceRecords(): Promise<Array<AttendanceRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -121,6 +134,7 @@ export interface backendInterface {
     getClassById(id: ClassId): Promise<Class>;
     getClasses(): Promise<Array<Class>>;
     getGrades(): Promise<Array<Grade>>;
+    getMessages(): Promise<Array<Message>>;
     getSessions(): Promise<Array<Session>>;
     getStudyMaterials(): Promise<Array<StudyMaterial>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
@@ -132,6 +146,7 @@ export interface backendInterface {
     markAttendance(classId: ClassId, sessionId: SessionId, studentId: string, status: AttendanceStatus): Promise<void>;
     requestApproval(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    sendMessage(receiverId: string, message: string): Promise<void>;
     setApproval(user: Principal, status: ApprovalStatus): Promise<void>;
     submitAssignment(assignmentId: AssignmentId, submissionFile: ExternalBlob): Promise<void>;
     uploadStudyMaterial(classId: ClassId, name: string, material: Attachment): Promise<MaterialId>;
